@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="format-detection" content="telephone=no">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>${site.name} - 医患的交流中心</title>
+<meta name="keywords" content="医科树Bbs,医科树" />
+<meta name="description" content="医科树Bbs,医科树,医科树论坛" /> 
+<script src="/${res}/bbs_forum/js/jquery1.9.1.js" type="text/javascript"></script>
+<script src="${resSys}/front.js" type="text/javascript"></script>
+<script src="/${res}/bbs_forum/js/blocksit.min.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="/${res}/bbs_forum/css/main.css" />
+</head>
+<body>
+<div class="main" id="main">
+  [#include "../include/页头.html"/]
+  <div class="member">
+    <div class="member-txt">
+      <img src="/${res}/bbs_member/img/face/${user.avatar!}">
+      <div class="member-m">
+        <div style="width:100%;overflow:hidden;"><h1>${user.username!}</h1><div class="member-r"></div></div>
+        <div style="width:100%;overflow:hidden;"><h2>等级:<span>${user.group.name!}</span>&nbsp;&nbsp;积分:<span>${user.point!}</span></h2></div>
+      </div> 
+    </div>
+   
+  </div>
+  <div class="member-main">
+    <div class="member-main-nav">
+      <ul>
+        <li [#if location?contains('member/mytopic')]style="border-bottom:1px solid #008cdc;"[/#if]><a href="${base}/member/mytopic.jhtml">我的主题</a></li>
+        <li [#if location?contains('member/mypost')]style="border-bottom:1px solid #008cdc;"[/#if]><a href="${base}/member/mypost.jhtml">我的回复</a></li>
+      </ul>
+    </div>
+    <div class="member-main-list">
+      <ul id="thelist">
+      </ul>
+    </div>
+  </div>
+</div>
+<script>
+var first=0;
+var count=20;
+content="";
+function getContent(){
+   [#if user??]
+     $.get("${base}/topic/v_list_json.jspx", {
+                mytopic:true,
+		first:first,
+		count:count
+	   }, function(data) {
+                content="";
+                for (var i=0;i<data.length;i++){
+                    var title=data[i].title;
+                    if(title.length>12){
+                        title=title.substring(0,12)+"..";
+                    }
+					content = content + "<li><a href='"+data[i].url+"'>";
+					content = content +"<span style='margin-left:4%;float:left;'>"+ title+"</span>";
+					content = content +"<span style='margin-right:4%;color:#858585;float:right;'>"+ data[i].createTime+"</span></a></li>";
+				}
+              $('#thelist').append(content);
+	   }, "json");       
+  [/#if]
+}
+$(function(){
+	getContent();
+	 $(window).scroll(function () {
+	        //$(window).scrollTop()这个方法是当前滚动条滚动的距离
+	        //$(window).height()获取当前窗体的高度
+	        //$(document).height()获取当前文档的高度
+	        var bot = 50; //bot是底部距离的高度
+	        if ((bot + $(window).scrollTop()) >= ($(document).height() - $(window).height())) {
+	           //当底部基本距离+滚动的高度〉=文档的高度-窗体的高度时；
+	            //我们需要去异步加载数据了
+	            first=first+count;
+	        	getContent();
+	        }
+	    });
+});
+</script>
+</body>
+</html>

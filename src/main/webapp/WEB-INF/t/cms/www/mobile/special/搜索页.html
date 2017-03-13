@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="format-detection" content="telephone=no">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>${site.name} - 医患的交流中心</title>
+<meta name="keywords" content="医科树Bbs,医科树" />
+<meta name="description" content="医科树Bbs,医科树,医科树论坛" /> 
+<link href="${resSys}/front.css" rel="stylesheet" type="text/css"/>
+<script src="${resSys}/jquery.js" type="text/javascript"></script>
+<script src="${resSys}/front.js" type="text/javascript"></script>
+<script src="/${res}/bbs_forum/js/blocksit.min.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="/${res}/bbs_forum/css/main.css" />
+</head>
+<body>
+<div class="main" id="main">
+  <div id="login-head" class="login-head" style="background-color:#008cdc;">
+    <a href="javascript:history.go(-1)"><img src="/${res}/bbs_forum/img/back-white.png"></a><span style="color:#fff;">搜索</span>
+  </div>
+    <div class="clear10"></div>
+  <div class="search-box">
+    
+    <input type="text" name="keywords" id="keywords" class="searchCon"  />
+    <input type="button" value="搜索" class="searchMenu" onclick="query('key')"/>
+ 
+  </div>
+  <div class="jht-list">
+     <ul id="thelist" style="color: red;text-align: center;">
+     </ul>
+   </div>
+</div>
+<script>
+var first=0;
+var count=10;
+content="";
+
+function query(key)
+{
+	first=0;
+	count=20;
+	var keyword=$("#keywords").val();
+	 $.post("${base}/topic/search.jhtml", {
+         keywords:keyword
+	}, function(data) {
+	   getContent(key); 
+	});   
+}
+
+function getContent(key){
+	var keyword=$("#keywords").val();
+  if(keyword!=null&&keyword!=""){
+     $.post("${base}/topic/v_list_json.jspx", {
+                keywords:keyword,
+		first:first,
+		count:count
+	   }, function(data) {
+                content="";
+               		for (var i=0;i<data.length;i++){
+   						content = content + "<li><a href='"+data[i].url+"'>";
+   						content = content +"<p>"+ data[i].title+"</p>";
+   						content = content +"<img src='/${res}/bbs_forum/img/pl_pic03.png'><span>"+ data[i].replyCount+"</span></a></li>";
+   					}
+               		if(key)
+               		{
+	               		 if(content==null||content=='')
+	 	              	{
+	 	              		content="<li style>抱歉，没有查找到相关数据!</li>";
+	 	              	}
+               			$('#thelist').html(content);
+               		}
+                   	else
+                   	{
+                   	 	$('#thelist').append(content)
+                   	} 
+	   }, "json");       
+  }  
+}
+$(function(){
+	 $(window).scroll(function () {
+	        //$(window).scrollTop()这个方法是当前滚动条滚动的距离
+	        //$(window).height()获取当前窗体的高度
+	        //$(document).height()获取当前文档的高度
+	        var bot = 10; //bot是底部距离的高度
+	        if ((bot + $(window).scrollTop()) >= ($(document).height() - $(window).height())) {
+	           //当底部基本距离+滚动的高度〉=文档的高度-窗体的高度时；
+	            //我们需要去异步加载数据了
+	            first=first+count;
+	        	getContent();
+	        }
+	    });
+});
+</script>
+</body>
+</html>
